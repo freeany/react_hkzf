@@ -46,7 +46,7 @@ class Index extends Component {
   }
   // 请求banner数据    ---
   async fy_getSwiperImgsData() {
-    let result = await axios.get('http://192.168.43.192:8080/home/swiper')
+    let result = await axios.get('http://192.168.1.73:8080/home/swiper')
     const { status, body } = result.data
     if (status === 200) {
       this.setState(
@@ -63,7 +63,7 @@ class Index extends Component {
   // 请求租房小组数据
   async fy_getGroups() {
     let res = await axios.get(
-      'http://192.168.43.192:8080/home/groups?area=AREA%7C88cff55c-aaa4-e2e0'
+      'http://192.168.1.73:8080/home/groups?area=AREA%7C88cff55c-aaa4-e2e0'
     )
 
     this.setState(
@@ -78,7 +78,7 @@ class Index extends Component {
   // 请求新闻news数据
   async fy_getNews() {
     let res = await axios.get(
-      'http://192.168.43.192:8080/home/news?area=AREA%7C88cff55c-aaa4-e2e0'
+      'http://192.168.1.73:8080/home/news?area=AREA%7C88cff55c-aaa4-e2e0'
     )
     this.setState(
       {
@@ -94,10 +94,6 @@ class Index extends Component {
     this.fy_getSwiperImgsData()
     this.fy_getGroups()
     this.fy_getNews()
-
-    navigator.geolocation.getCurrentPosition(function(position) {
-      console.log(position)
-    })
   }
   // 渲染最新资讯
   renderNews() {
@@ -106,7 +102,7 @@ class Index extends Component {
         <div className="imgwrap">
           <img
             className="img"
-            src={`http://192.168.43.192:8080${item.imgSrc}`}
+            src={`http://192.168.1.73:8080${item.imgSrc}`}
             alt=""
           />
         </div>
@@ -164,7 +160,7 @@ class Index extends Component {
                   }}
                 >
                   <img
-                    src={'http://192.168.43.192:8080' + val.imgSrc}
+                    src={'http://192.168.1.73:8080' + val.imgSrc}
                     alt=""
                     style={{ width: '100%', verticalAlign: 'top' }}
                     onLoad={() => {
@@ -207,7 +203,7 @@ class Index extends Component {
                   <p className="title">{item.title}</p>
                   <span className="info">{item.desc}</span>
                 </div>
-                <img src={`http://192.168.43.192:8080${item.imgSrc}`} alt="" />
+                <img src={`http://192.168.1.73:8080${item.imgSrc}`} alt="" />
               </Flex>
             )}
           />
