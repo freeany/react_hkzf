@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Carousel, Flex, Grid, WingBlank } from 'antd-mobile'
 import axios from 'axios'
+import { getCurrentCity } from '../../utils'
 import './index.scss'
 
 // 引入图片
@@ -42,11 +43,13 @@ class Index extends Component {
     // 租房小组
     groups: [],
     // 最新资讯
-    news: []
+    news: [],
+    // 当前城市
+    currentCity: '北京'
   }
   // 请求banner数据    ---
   async fy_getSwiperImgsData() {
-    let result = await axios.get('http://192.168.1.73:8080/home/swiper')
+    let result = await axios.get('http://localhost:8080/home/swiper')
     const { status, body } = result.data
     if (status === 200) {
       this.setState(
@@ -63,7 +66,7 @@ class Index extends Component {
   // 请求租房小组数据
   async fy_getGroups() {
     let res = await axios.get(
-      'http://192.168.1.73:8080/home/groups?area=AREA%7C88cff55c-aaa4-e2e0'
+      'http://localhost:8080/home/groups?area=AREA%7C88cff55c-aaa4-e2e0'
     )
 
     this.setState(
@@ -78,7 +81,7 @@ class Index extends Component {
   // 请求新闻news数据
   async fy_getNews() {
     let res = await axios.get(
-      'http://192.168.1.73:8080/home/news?area=AREA%7C88cff55c-aaa4-e2e0'
+      'http://localhost:8080/home/news?area=AREA%7C88cff55c-aaa4-e2e0'
     )
     this.setState(
       {
@@ -89,11 +92,20 @@ class Index extends Component {
       }
     )
   }
+  // 请求 根据百度地图api 获取当前城市数据（然后根据接口获取当前城市是否有房源，没有则后台返回上海）
+  async getCurrentCityName() {
+    const city = await getCurrentCity()
+    this.setState({
+      currentCity: city.label
+    })
+  }
   // 钩子函数
   componentDidMount() {
     this.fy_getSwiperImgsData()
     this.fy_getGroups()
     this.fy_getNews()
+    // 获取当前城市
+    this.getCurrentCityName()
   }
   // 渲染最新资讯
   renderNews() {
@@ -102,7 +114,7 @@ class Index extends Component {
         <div className="imgwrap">
           <img
             className="img"
-            src={`http://192.168.1.73:8080${item.imgSrc}`}
+            src={`http://localhost:8080${item.imgSrc}`}
             alt=""
           />
         </div>
@@ -128,7 +140,7 @@ class Index extends Component {
                 className="location"
                 onClick={() => history.push('/citylist')}
               >
-                <span>默认上海</span>
+                <span>{this.state.currentCity}</span>
                 <i className="iconfont icon-arrow" />
               </div>
               <div
@@ -160,7 +172,7 @@ class Index extends Component {
                   }}
                 >
                   <img
-                    src={'http://192.168.1.73:8080' + val.imgSrc}
+                    src={'http://localhost:8080' + val.imgSrc}
                     alt=""
                     style={{ width: '100%', verticalAlign: 'top' }}
                     onLoad={() => {
@@ -203,7 +215,7 @@ class Index extends Component {
                   <p className="title">{item.title}</p>
                   <span className="info">{item.desc}</span>
                 </div>
-                <img src={`http://192.168.1.73:8080${item.imgSrc}`} alt="" />
+                <img src={`http://localhost:8080${item.imgSrc}`} alt="" />
               </Flex>
             )}
           />

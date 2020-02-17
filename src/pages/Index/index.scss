@@ -5,6 +5,11 @@
   // 轮播图阻止默认行为的bug
   .index-swipper {
     touch-action: none;
+
+    .am-carousel {
+      // 如果swipper数据返回的很慢，则会出现数据上移的现象， 这里给个固定高
+      height: 212px;
+    }
   }
   // 菜单导航
   .index-menus {
