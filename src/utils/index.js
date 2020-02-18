@@ -1,5 +1,7 @@
 import axios from 'axios'
 import { setCity, getCity } from './citys'
+import { REACT_APP_URL } from './getBaseUrl'
+import { API } from './API.js'
 
 const getCurrentCity = () => {
   const currentCity = getCity()
@@ -22,4 +24,4 @@ const getCurrentCity = () => {
   }
 }
 
-export { getCurrentCity, setCity, getCity }
+export { getCurrentCity, setCity, getCity, REACT_APP_URL, API }

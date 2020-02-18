@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { Carousel, Flex, Grid, WingBlank } from 'antd-mobile'
-import axios from 'axios'
-import { getCurrentCity } from '../../utils'
+import { getCurrentCity, REACT_APP_URL, API } from '../../utils'
 import './index.scss'
+import SearchHeader from '../../components/SearchHeader'
 
 // 引入图片
 import nav1 from '../../asstes/images/nav-1.png'
@@ -49,7 +49,7 @@ class Index extends Component {
   }
   // 请求banner数据    ---
   async fy_getSwiperImgsData() {
-    let result = await axios.get('http://localhost:8080/home/swiper')
+    let result = await API.get('/home/swiper')
     const { status, body } = result.data
     if (status === 200) {
       this.setState(
@@ -65,9 +65,7 @@ class Index extends Component {
   }
   // 请求租房小组数据
   async fy_getGroups() {
-    let res = await axios.get(
-      'http://localhost:8080/home/groups?area=AREA%7C88cff55c-aaa4-e2e0'
-    )
+    let res = await API.get('/home/groups?area=AREA%7C88cff55c-aaa4-e2e0')
 
     this.setState(
       {
@@ -80,9 +78,7 @@ class Index extends Component {
   }
   // 请求新闻news数据
   async fy_getNews() {
-    let res = await axios.get(
-      'http://localhost:8080/home/news?area=AREA%7C88cff55c-aaa4-e2e0'
-    )
+    let res = await API.get('/home/news?area=AREA%7C88cff55c-aaa4-e2e0')
     this.setState(
       {
         news: res.data.body
@@ -112,11 +108,7 @@ class Index extends Component {
     return this.state.news.map(item => (
       <div className="news-item" key={item.id}>
         <div className="imgwrap">
-          <img
-            className="img"
-            src={`http://localhost:8080${item.imgSrc}`}
-            alt=""
-          />
+          <img className="img" src={`${REACT_APP_URL}${item.imgSrc}`} alt="" />
         </div>
         <Flex className="content" direction="column" justify="between">
           <h3 className="title">{item.title}</h3>
@@ -134,28 +126,7 @@ class Index extends Component {
       <div className="home-index">
         {/* 顶部导航搜索 */}
         <div className="index-search">
-          <Flex>
-            <Flex className="search-left">
-              <div
-                className="location"
-                onClick={() => history.push('/citylist')}
-              >
-                <span>{this.state.currentCity}</span>
-                <i className="iconfont icon-arrow" />
-              </div>
-              <div
-                className="search-form"
-                onClick={() => history.push('/search')}
-              >
-                <i className="iconfont icon-seach" />
-                <span>请输入小区或地址</span>
-              </div>
-            </Flex>
-            <i
-              className="iconfont icon-map"
-              onClick={() => history.push('/map')}
-            />
-          </Flex>
+          <SearchHeader></SearchHeader>
         </div>
         {/* 轮播图 */}
         <div className="index-swipper">
@@ -172,7 +143,7 @@ class Index extends Component {
                   }}
                 >
                   <img
-                    src={'http://localhost:8080' + val.imgSrc}
+                    src={REACT_APP_URL + val.imgSrc}
                     alt=""
                     style={{ width: '100%', verticalAlign: 'top' }}
                     onLoad={() => {
@@ -215,7 +186,7 @@ class Index extends Component {
                   <p className="title">{item.title}</p>
                   <span className="info">{item.desc}</span>
                 </div>
-                <img src={`http://localhost:8080${item.imgSrc}`} alt="" />
+                <img src={`${REACT_APP_URL}${item.imgSrc}`} alt="" />
               </Flex>
             )}
           />

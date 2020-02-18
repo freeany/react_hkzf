@@ -2,14 +2,19 @@ import React, { Component } from 'react'
 import NavHeader from '../../components/NavHeader'
 import { getCurrentCity } from '../../utils'
 import axios from 'axios'
+import { Toast } from 'antd-mobile'
 
 import styles from './index.module.scss'
 
 class Map extends Component {
+  state = {
+    isShowList: false,
+    houseList: []
+  }
   componentDidMount() {
     this.fy_resolveAddress()
   }
-  // 解析地址
+  // 解析地址， 渲染地图到页面上
   async fy_resolveAddress() {
     const BMap = window.BMap
     const address = await getCurrentCity()
@@ -38,12 +43,16 @@ class Map extends Component {
       address.label
     )
   }
+
   // 1. 渲染覆盖物
   renderOverlays = async id => {
+    Toast.loading('正在加载中..', 0)
+
     //1.根据id , 发送请求, 查看房源信息
     let res = await axios.get('http://localhost:8080/area/map', {
       params: { id }
     })
+    Toast.hide()
     //2. 通过 getTypeAndZoom  获取 类型(圆 or 方) + 下一次的缩放级别
     const { type, nextZoom } = this.getTypeAndZoom()
     //3. 遍历 创建 渲染物
@@ -52,7 +61,7 @@ class Map extends Component {
       this.createOverlays(type, nextZoom, item)
     })
   }
-  // 2. 获取 类型 和 下一次缩放级别
+  // 2. 获取 类型 和 下一次缩放级别 -- 封装
   getTypeAndZoom() {
     let type
     let curZoom = this.map.getZoom()
@@ -73,7 +82,7 @@ class Map extends Component {
     }
   }
 
-  // 3. 创建覆盖物
+  // 3. 创建覆盖物 -- 封装
   createOverlays(type, nextZoom, item) {
     const {
       coord: { longitude, latitude },
@@ -93,7 +102,7 @@ class Map extends Component {
     }
   }
 
-  // 4. 创建 圆 覆盖物
+  // 4. 创建 圆 覆盖物 -- 封装
   createCircle(point, areaName, value, count, nextZoom) {
     const BMap = window.BMap
     // 添加覆盖物
@@ -127,7 +136,7 @@ class Map extends Component {
     this.map.addOverlay(label)
   }
 
-  // 5. 创建 方  覆盖物
+  // 5. 创建 方  覆盖物 -- 封装
   createReact(point, areaName, value, count) {
     const BMap = window.BMap
     // 添加覆盖物
@@ -152,152 +161,70 @@ class Map extends Component {
           `)
     // 注册点击事件
     label.addEventListener('click', e => {
-      console.log(123)
+      this.getHouseList(value)
+      // 移动
+      let x = e.changedTouches[0].clientX - window.innerWidth / 2
+      let y = e.changedTouches[0].clientY - (window.innerHeight - 330) / 2
+
+      this.map.panBy(-x, -y)
     })
     this.map.addOverlay(label)
   }
 
   // 创建房屋列表结构
-  // 房屋列表结构
   renderHouseList = () => {
-    const houseList = (
-      <div className={[styles.houseList, styles.show].join(' ')}>
-        <div className={styles.titleWrap}>
-          <h1 className={styles.listTitle}>房屋列表</h1>
-          <a className={styles.titleMore} href="/house/list">
-            更多房源
-          </a>
-        </div>
-        <div className={styles.houseItems}>
-          <div className={styles.house}>
-            <div className={styles.imgWrap}>
-              <img
-                className={styles.img}
-                src="http://996houzi.com/newImg/7bk75ppj0.jpg"
-                alt=""
-              />
+    return this.state.houseList.map(item => {
+      console.log(item)
+      const { desc, houseCode, houseImg, price, tags, title } = item
+      return (
+        <div className={styles.house} key={houseCode}>
+          <div className={styles.imgWrap}>
+            <img
+              className={styles.img}
+              src={'http://localhost:8080' + houseImg}
+              alt=""
+            />
+          </div>
+          <div className={styles.content}>
+            <h3 className={styles.title}>{title}</h3>
+            <div className={styles.desc}>{desc}</div>
+            <div>
+              {tags.map((item, index) => {
+                let tagClass = 'tag3'
+                if (index === 0) tagClass = 'tag1'
+                if (index === 1) tagClass = 'tag2'
+                return (
+                  <span
+                    key={index}
+                    className={[styles.tag, styles[tagClass]].join(' ')}
+                  >
+                    {item}
+                  </span>
+                )
+              })}
             </div>
-            <div className={styles.content}>
-              <h3 className={styles.title}>
-                三期精装修两房，南北户型，房东诚意出租出门燎原双语
-              </h3>
-              <div className={styles.desc}>2室2厅1卫/82/南/阳光美景城</div>
-              <div>
-                <span className={[styles.tag, styles.tag1].join(' ')}>
-                  近地铁
-                </span>
-              </div>
-              <div className={styles.price}>
-                <span className={styles.priceNum}>8500</span> 元/月
-              </div>
+            <div className={styles.price}>
+              <span className={styles.priceNum}>{price}</span> 元/月
             </div>
           </div>
         </div>
-      </div>
-    )
-
-    return houseList
+      )
+    })
   }
 
-  // 点击区，查看镇
-  // renderOverlays_ZHEN = async id => {
-  //   // 接口 : 查看房源信息
-  //   let res = await axios.get('http://localhost:8080/area/map', {
-  //     params: {
-  //       id
-  //     }
-  //   })
-  //   const result = res.data.body
-  //   console.log(result)
-  //   result.forEach(item => {
-  //     const {
-  //       label: name,
-  //       value,
-  //       count,
-  //       coord: { latitude, longitude }
-  //     } = item
-  //     const BMap = window.BMap
-  //     const point = new BMap.Point(longitude, latitude)
-  //     // 添加覆盖物
-  //     var opts = {
-  //       position: point, // 指定文本标注所在的地理位置
-  //       offset: new BMap.Size(-35, -35) //设置文本偏移量
-  //     }
-  //     var label = new BMap.Label('欢迎使用百度地图', opts) // 创建文本标注对象
-  //     // 清除默认的文本覆盖物样式，因为下面有setContent进行覆盖
-  //     label.setStyle({
-  //       height: '0',
-  //       border: 'none'
-  //     })
-  //     label.setContent(`
-  //           <div class="${styles.bubble} .quCircle">
-  //             <p class="${styles.name}">${name}</p>
-  //             <p>${count}套</p>
-  //           </div>
-  //         `)
-  //     label.addEventListener('click', e => {
-  //       //1. 缩放级别 => 15
-  //       this.map.centerAndZoom(point, 15) // 将指定的坐标解析后放到地图中心
-  //       //2. 清除镇的覆盖物
-  //       setTimeout(() => {
-  //         this.map.clearOverlays()
-  //       }, 0)
-  //       //3. 渲染 小区 的 覆盖物
-  //       this.renderOverlays_XIAOQU(value)
-  //     })
-  //     this.map.addOverlay(label) // 将文本覆盖物添加到地图上
-  //   })
-  // }
-  // // 点击镇，查看小区
-  // async renderOverlays_XIAOQU(id) {
-  //   // 接口 : 查看房源信息
-  //   let res = await axios.get('http://localhost:8080/area/map', {
-  //     params: {
-  //       id
-  //     }
-  //   })
-  //   const result = res.data.body
-  //   console.log(result)
-  //   result.forEach(item => {
-  //     const {
-  //       label: name,
-  //       value,
-  //       count,
-  //       coord: { latitude, longitude }
-  //     } = item
-  //     const BMap = window.BMap
-  //     const point = new BMap.Point(longitude, latitude)
-  //     // 添加覆盖物
-  //     var opts = {
-  //       position: point, // 指定文本标注所在的地理位置
-  //       offset: new BMap.Size(-50, -10) //设置文本偏移量
-  //     }
-  //     var label = new BMap.Label('欢迎使用百度地图', opts) // 创建文本标注对象
-  //     // 清除默认的文本覆盖物样式，因为下面有setContent进行覆盖
-  //     label.setStyle({
-  //       height: '0',
-  //       border: 'none'
-  //     })
-  //     label.setContent(`
-  //       <div class="${styles.rect}">
-  //         <span class="${styles.housename}">${name}</span>
-  //         <span class="${styles.housenum}">${count}套</span>
-  //         <i class="${styles.arrow}"></i>
-  //       </div>
-  //     `)
-  //     label.addEventListener('click', e => {
-  //       //1. 缩放级别 => 15
-  //       // this.map.centerAndZoom(point, 15) // 将指定的坐标解析后放到地图中心
-  //       //2. 清除镇的覆盖物
-  //       // setTimeout(() => {
-  //       //   this.map.clearOverlays()
-  //       // }, 0)
-  //       //3. 渲染 小区 的 覆盖物
-  //       // this.renderOverlays_XIAOQU(value)
-  //     })
-  //     this.map.addOverlay(label) // 将文本覆盖物添加到地图上
-  //   })
-  // }
+  // 获取下面那个房屋列表数据 (逻辑)
+  getHouseList = async value => {
+    Toast.loading('正在加载中..', 0)
+
+    const res = await axios.get(`http://localhost:8080/houses?cityId=${value}`)
+    Toast.hide()
+    console.log('房屋列表', res)
+    this.setState({
+      isShowList: true,
+      houseList: res.data.body.list
+    })
+  }
+
   render() {
     return (
       <div className={styles.map}>
@@ -305,6 +232,21 @@ class Map extends Component {
           <NavHeader>地图找房</NavHeader>
         </div>
         <div id="container"></div>
+        {/* 房屋列表 */}
+        <div
+          className={[
+            styles.houseList,
+            this.state.isShowList ? styles.show : ''
+          ].join(' ')}
+        >
+          <div className={styles.titleWrap}>
+            <h1 className={styles.listTitle}>房屋列表</h1>
+            <a className={styles.titleMore} href="/house/list">
+              更多房源
+            </a>
+          </div>
+          <div className={styles.houseItems}>{this.renderHouseList()}</div>
+        </div>
       </div>
     )
   }

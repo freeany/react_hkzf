@@ -1,12 +1,11 @@
 import React, { Component } from 'react'
-import axios from 'axios'
 import { Toast } from 'antd-mobile'
 import NavHeader from '../../components/NavHeader'
 import { getCurrentCity } from '../../utils'
 import { List, AutoSizer } from 'react-virtualized'
 import styles from './index.module.scss'
 import './index.scss'
-import { setCity } from '../../utils'
+import { setCity, API } from '../../utils'
 
 // 暂定只有这四个城市有房源信息
 const citysHavaHouse = ['北京', '上海', '深圳', '广州']
@@ -125,7 +124,7 @@ class CityList extends Component {
   }
   // 获取所有城市列表的数据
   async fy_getCityList() {
-    const result = await axios.get('http://localhost:8080/area/city?level=1')
+    const result = await API.get('/area/city?level=1')
     const cityLists = result.data.body
     const getCityListsObjeAndArray = this.fy_getObjAndArr(cityLists)
     const setHotCity = await this.fy_hotArea(getCityListsObjeAndArray)
@@ -197,7 +196,7 @@ class CityList extends Component {
   // 2. 获取热门城市重新填充数据结构
   async fy_hotArea(obj) {
     const { citysObj, citysIndex } = obj
-    const result = await axios.get('http://localhost:8080/area/hot')
+    const result = await API.get('/area/hot')
     const hotCity = result.data.body
     // console.log(result.data.body)
     citysObj['热门城市'] = hotCity
