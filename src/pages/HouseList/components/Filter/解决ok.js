@@ -16,15 +16,7 @@ export default class Filter extends Component {
     // 对不点确定进行的控制
     previousSelected: 0,
     // 总的筛选条件
-    conditionData: '',
-    // 默认条件  这里确定的是由 在reactTool中对picker进行onchange事件得来的默认结果。
-    selectedValues: {
-      area: ['area', 'null'],
-      mode: ['null'],
-      price: ['null'],
-      more: []
-    },
-    type: 'area'
+    conditionData: ''
     // 给不同tab不同的筛选条件
     // getTitleConditionData: '',
   }
@@ -42,28 +34,47 @@ export default class Filter extends Component {
   // 根据用户点击对数据进行假数据数据结构的的封装，然后返回给picker组件
   // 点击标题， 对应的title高亮
   changeSelected = index => {
-    let type = ''
-    switch (index) {
-      case 0:
-        type = 'area'
-        break
-      case 1:
-        type = 'mode'
-        break
-      case 2:
-        type = 'price'
-        break
-      default:
-        type = 'more'
-        break
-    }
+    // 对数据进行过滤
+    // const {
+    //   area,
+    //   characteristic,
+    //   floor,
+    //   oriented,
+    //   price,
+    //   rentType,
+    //   roomType,
+    //   subway
+    // } = {
+    //   ...this.state.conditionData
+    // }
+    // let finallyConditionData = []
+    // let col = 1
+    // switch (index) {
+    //   case 0:
+    //     finallyConditionData = [area, subway]
+    //     col = 3
+    //     break
+    //   case 1:
+    //     finallyConditionData = rentType
+    //     col = 1
+    //     break
+    //   case 2:
+    //     finallyConditionData = price
+    //     col = 1
+    //     break
+    //   default:
+    //     index = 3
+    //     finallyConditionData = ''
+    //     break
+    // }
     this.setState({
       // 控制title选中的样式
       isSelected: index,
       isShowPicker: index === 3 ? false : true,
       // 这个的意思 当点击取消或mask的时候，将isSelected还是更新为上个值， 确定的时候，将isSelected的存到这里来。
-      previousSelected: this.state.isSelected,
-      type
+      previousSelected: this.state.isSelected
+      // getTitleConditionData: finallyConditionData,
+      // col: col
     })
   }
 
@@ -78,36 +89,11 @@ export default class Filter extends Component {
 
   // 点击确定， 提交信息， 将previousSelected的数据更新为isSelecte，遮罩与picker隐藏
   clickSure = e => {
-    if (!e) {
-      this.setState({
-        isShowPicker: false,
-        previousSelected: this.state.isSelected
-      })
-      return
-    }
-    let type = ''
-    switch (this.state.isSelected) {
-      case 0:
-        type = 'area'
-        break
-      case 1:
-        type = 'mode'
-        break
-      case 2:
-        type = 'price'
-        break
-      default:
-        type = 'more'
-        break
-    }
+    e.persist()
+    console.log('提交信息')
     this.setState({
-      selectedValues: {
-        ...this.state.selectedValues,
-        [type]: e
-      },
       isShowPicker: false,
-      previousSelected: this.state.isSelected,
-      type: type
+      previousSelected: this.state.isSelected
     })
   }
 
@@ -118,9 +104,7 @@ export default class Filter extends Component {
       return null
     }
     const index = this.state.isSelected
-    const { area, price, rentType, subway } = {
-      ...this.state.conditionData
-    }
+    const { area, price, rentType, subway } = { ...this.state.conditionData }
     let finallyConditionData = []
     let col = 1
     switch (index) {
@@ -141,9 +125,6 @@ export default class Filter extends Component {
     }
     return (
       <FilterPicker
-        key={this.state.type}
-        type={this.state.type}
-        selectedValues={this.state.selectedValues}
         className={isShow}
         clickMask={this.clickMask}
         clickSure={this.clickSure}

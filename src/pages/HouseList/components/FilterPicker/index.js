@@ -88,21 +88,29 @@ const province = [
 ]
 
 export default class FilterPicker extends Component {
+  state = {
+    value: this.props.selectedValues[this.props.type] || ''
+  }
+  getPickerValue = e => {
+    this.setState({
+      value: e
+    })
+  }
   render() {
-    console.log(this.props.getTitleConditionData)
     return (
       <div className={this.props.className}>
         {/* 选择器组件： */}
         <PickerView
           data={this.props.getTitleConditionData || province}
-          value={null}
+          value={this.state.value}
+          onChange={e => this.getPickerValue(e)}
           cols={this.props.col}
         />
 
         {/* 底部按钮 */}
         <FilterFooter
           clickMask={this.props.clickMask}
-          clickSure={this.props.clickSure}
+          clickSure={() => this.props.clickSure(this.state.value)}
         />
       </div>
     )

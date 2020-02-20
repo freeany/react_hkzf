@@ -15,22 +15,15 @@ export default class Filter extends Component {
     isShowPicker: false,
     // 对不点确定进行的控制
     previousSelected: 0,
-    // 总的筛选条件
+    // 筛选条件
     conditionData: '',
-    // 默认条件  这里确定的是由 在reactTool中对picker进行onchange事件得来的默认结果。
-    selectedValues: {
-      area: ['area', 'null'],
-      mode: ['null'],
-      price: ['null'],
-      more: []
-    },
-    type: 'area'
-    // 给不同tab不同的筛选条件
-    // getTitleConditionData: '',
+    getTitleConditionData: '',
+    col: 1
   }
   componentDidMount() {
     this.getCityData()
   }
+
   //  数据初始化，获取到该城市 显示查询条件的数据，
   getCityData = async () => {
     const { value } = await getCurrentCity()
@@ -42,83 +35,17 @@ export default class Filter extends Component {
   // 根据用户点击对数据进行假数据数据结构的的封装，然后返回给picker组件
   // 点击标题， 对应的title高亮
   changeSelected = index => {
-    let type = ''
-    switch (index) {
-      case 0:
-        type = 'area'
-        break
-      case 1:
-        type = 'mode'
-        break
-      case 2:
-        type = 'price'
-        break
-      default:
-        type = 'more'
-        break
-    }
-    this.setState({
-      // 控制title选中的样式
-      isSelected: index,
-      isShowPicker: index === 3 ? false : true,
-      // 这个的意思 当点击取消或mask的时候，将isSelected还是更新为上个值， 确定的时候，将isSelected的存到这里来。
-      previousSelected: this.state.isSelected,
-      type
-    })
-  }
-
-  // 点击mask, 将 遮罩 与 picker 隐藏, 并将isSelected的值更新为上个数据（previousSelected）
-  clickMask = e => {
-    e.persist()
-    this.setState({
-      isShowPicker: false,
-      isSelected: this.state.previousSelected
-    })
-  }
-
-  // 点击确定， 提交信息， 将previousSelected的数据更新为isSelecte，遮罩与picker隐藏
-  clickSure = e => {
-    if (!e) {
-      this.setState({
-        isShowPicker: false,
-        previousSelected: this.state.isSelected
-      })
-      return
-    }
-    let type = ''
-    switch (this.state.isSelected) {
-      case 0:
-        type = 'area'
-        break
-      case 1:
-        type = 'mode'
-        break
-      case 2:
-        type = 'price'
-        break
-      default:
-        type = 'more'
-        break
-    }
-    this.setState({
-      selectedValues: {
-        ...this.state.selectedValues,
-        [type]: e
-      },
-      isShowPicker: false,
-      previousSelected: this.state.isSelected,
-      type: type
-    })
-  }
-
-  renderFilterPicker() {
-    const isShow = this.state.isShowPicker ? '' : styles.show
-    // 如果不显示，则直接返回null即可，避免render报错。
-    if (isShow) {
-      return null
-    }
-    const index = this.state.isSelected
-    const { area, price, rentType, subway } = {
+    // 对数据进行过滤
+    const {
+      area,
+      characteristic,
+      floor,
+      oriented,
+      price,
+      rentType,
+      roomType,
+      subway
+    } = {
       ...this.state.conditionData
     }
     let finallyConditionData = []
@@ -137,22 +64,40 @@ export default class Filter extends Component {
         col = 1
         break
       default:
-        return null
+        index = 3
+        finallyConditionData = ''
+        break
     }
-    return (
-      <FilterPicker
-        key={this.state.type}
-        type={this.state.type}
-        selectedValues={this.state.selectedValues}
-        className={isShow}
-        clickMask={this.clickMask}
-        clickSure={this.clickSure}
-        getTitleConditionData={finallyConditionData}
-        col={col}
-      />
-    )
+
+    this.setState({
+      // 控制title选中的样式
+      isSelected: index,
+      isShowPicker: index === 3 ? false : true,
+      // 这个的意思 当点击取消或mask的时候，将isSelected还是更新为上个值， 确定的时候，将isSelected的存到这里来。
+      previousSelected: this.state.isSelected,
+      getTitleConditionData: finallyConditionData,
+      col: col
+    })
   }
 
+  // 点击mask, 将 遮罩 与 picker 隐藏, 并将isSelected的值更新为上个数据（previousSelected）
+  clickMask = e => {
+    e.persist()
+    this.setState({
+      isShowPicker: false,
+      isSelected: this.state.previousSelected
+    })
+  }
+
+  // 点击确定， 提交信息， 将previousSelected的数据更新为isSelecte，遮罩与picker隐藏
+  clickSure = e => {
+    e.persist()
+    console.log('提交信息')
+    this.setState({
+      isShowPicker: false,
+      previousSelected: this.state.isSelected
+    })
+  }
   render() {
     const isShow = this.state.isShowPicker ? '' : styles.show
     return (
@@ -169,7 +114,13 @@ export default class Filter extends Component {
             isSelected={this.state.isSelected}
           />
           {/* 前三个菜单对应的内容： */}
-          {this.renderFilterPicker()}
+          <FilterPicker
+            className={isShow}
+            clickMask={this.clickMask}
+            clickSure={this.clickSure}
+            getTitleConditionData={this.state.getTitleConditionData}
+            col={this.state.col}
+          />
           {/* 最后一个菜单对应的内容： */}
           {/* <FilterMore /> */}
         </div>
