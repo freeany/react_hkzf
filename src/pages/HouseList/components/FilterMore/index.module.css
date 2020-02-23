@@ -1,7 +1,9 @@
 .root {
   position: relative;
 }
-
+.dnone {
+  display: none;
+}
 .mask {
   position: fixed;
   z-index: 2;

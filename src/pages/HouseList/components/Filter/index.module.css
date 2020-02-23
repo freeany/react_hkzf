@@ -22,3 +22,7 @@
 .show {
   display: none;
 }
+
+.clear {
+  overflow: hidden;
+}

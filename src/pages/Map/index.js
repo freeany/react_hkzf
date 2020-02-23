@@ -3,6 +3,7 @@ import NavHeader from '../../components/NavHeader'
 import { getCurrentCity } from '../../utils'
 import axios from 'axios'
 import { Toast } from 'antd-mobile'
+import HouseItem from '../../components/HouseItem'
 
 import styles from './index.module.scss'
 
@@ -173,43 +174,9 @@ class Map extends Component {
 
   // 创建房屋列表结构
   renderHouseList = () => {
-    return this.state.houseList.map(item => {
-      console.log(item)
-      const { desc, houseCode, houseImg, price, tags, title } = item
-      return (
-        <div className={styles.house} key={houseCode}>
-          <div className={styles.imgWrap}>
-            <img
-              className={styles.img}
-              src={'http://localhost:8080' + houseImg}
-              alt=""
-            />
-          </div>
-          <div className={styles.content}>
-            <h3 className={styles.title}>{title}</h3>
-            <div className={styles.desc}>{desc}</div>
-            <div>
-              {tags.map((item, index) => {
-                let tagClass = 'tag3'
-                if (index === 0) tagClass = 'tag1'
-                if (index === 1) tagClass = 'tag2'
-                return (
-                  <span
-                    key={index}
-                    className={[styles.tag, styles[tagClass]].join(' ')}
-                  >
-                    {item}
-                  </span>
-                )
-              })}
-            </div>
-            <div className={styles.price}>
-              <span className={styles.priceNum}>{price}</span> 元/月
-            </div>
-          </div>
-        </div>
-      )
-    })
+    return this.state.houseList.map(item => (
+      <HouseItem key={item.houseCode} {...item}></HouseItem>
+    ))
   }
 
   // 获取下面那个房屋列表数据 (逻辑)

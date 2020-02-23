@@ -24,9 +24,8 @@ export default class Filter extends Component {
       price: ['null'],
       more: []
     },
-    type: 'area'
-    // 给不同tab不同的筛选条件
-    // getTitleConditionData: '',
+    type: 'area',
+    isShowMore: false
   }
   componentDidMount() {
     this.getCityData()
@@ -42,6 +41,9 @@ export default class Filter extends Component {
   // 根据用户点击对数据进行假数据数据结构的的封装，然后返回给picker组件
   // 点击标题， 对应的title高亮
   changeSelected = index => {
+    // 优化： 点了title之后，为了防止滚动穿透，给body加一个overflow: hidden 即可
+    document.body.classList.add(styles.clear)
+
     let type = ''
     switch (index) {
       case 0:
@@ -60,6 +62,7 @@ export default class Filter extends Component {
     this.setState({
       // 控制title选中的样式
       isSelected: index,
+      isShowMore: true,
       isShowPicker: index === 3 ? false : true,
       // 这个的意思 当点击取消或mask的时候，将isSelected还是更新为上个值， 确定的时候，将isSelected的存到这里来。
       previousSelected: this.state.isSelected,
@@ -69,18 +72,29 @@ export default class Filter extends Component {
 
   // 点击mask, 将 遮罩 与 picker 隐藏, 并将isSelected的值更新为上个数据（previousSelected）
   clickMask = e => {
+    document.body.classList.remove(styles.clear)
+
     e.persist()
-    this.setState({
-      isShowPicker: false,
-      isSelected: this.state.previousSelected
-    })
+    if (this.state.isSelected !== 3) {
+      this.setState({
+        isShowPicker: false,
+        isSelected: this.state.previousSelected
+      })
+    } else {
+      this.setState({
+        isShowMore: false
+      })
+    }
   }
 
   // 点击确定， 提交信息， 将previousSelected的数据更新为isSelecte，遮罩与picker隐藏
+  //  e 即使 value
   clickSure = e => {
+    document.body.classList.remove(styles.clear)
     if (!e) {
       this.setState({
         isShowPicker: false,
+        isShowMore: false,
         previousSelected: this.state.isSelected
       })
       return
@@ -100,17 +114,51 @@ export default class Filter extends Component {
         type = 'more'
         break
     }
+
+    /* 
+      需要将数据回传给houselist页面。
+    */
+    //  需要处理数据
+    const houses = this.handleSelectValue({
+      ...this.state.selectedValues,
+      [type]: e
+    })
+    this.props.onFilter(houses)
+
     this.setState({
       selectedValues: {
         ...this.state.selectedValues,
         [type]: e
       },
       isShowPicker: false,
+      isShowMore: false,
       previousSelected: this.state.isSelected,
       type: type
     })
   }
 
+  // 处理需要回传给houselist的数据
+  handleSelectValue(newSelect) {
+    console.log(newSelect, 'newSelect...')
+    let obj = {}
+    // 处理area
+    if (newSelect.area.length === 2) {
+      obj.area = newSelect.area[1]
+    }
+    if (newSelect.area.length === 3) {
+      obj.area =
+        newSelect.area[2] === 'null' ? newSelect.area[1] : newSelect.area[2]
+    }
+
+    // 处理mode
+    obj.mode = newSelect.mode[0]
+    // 处理price
+    obj.price = newSelect.price[0]
+    obj.more = newSelect.more.join(',')
+
+    // console.log('处理后的obj', obj)
+    return obj
+  }
   renderFilterPicker() {
     const isShow = this.state.isShowPicker ? '' : styles.show
     // 如果不显示，则直接返回null即可，避免render报错。
@@ -153,6 +201,26 @@ export default class Filter extends Component {
     )
   }
 
+  renderFilterMore() {
+    const {
+      isSelected,
+      isShowMore,
+      conditionData: { roomType, oriented, floor, characteristic }
+    } = this.state
+    if (isSelected !== 3 || !isShowMore) {
+      return null
+    }
+
+    const data = { roomType, oriented, floor, characteristic }
+    return (
+      <FilterMore
+        selectFilterMoreValue={this.state.selectedValues['more']}
+        clickMask={this.clickMask}
+        clickSure={this.clickSure}
+        data={data}
+      />
+    )
+  }
   render() {
     const isShow = this.state.isShowPicker ? '' : styles.show
     return (
@@ -171,7 +239,7 @@ export default class Filter extends Component {
           {/* 前三个菜单对应的内容： */}
           {this.renderFilterPicker()}
           {/* 最后一个菜单对应的内容： */}
-          {/* <FilterMore /> */}
+          {this.renderFilterMore()}
         </div>
       </div>
     )
