@@ -5,6 +5,8 @@ import FilterTitle from '../FilterTitle'
 import FilterPicker from '../FilterPicker'
 import FilterMore from '../FilterMore'
 
+import { Spring } from 'react-spring/renderprops'
+
 import styles from './index.module.css'
 
 export default class Filter extends Component {
@@ -139,7 +141,7 @@ export default class Filter extends Component {
 
   // 处理需要回传给houselist的数据
   handleSelectValue(newSelect) {
-    console.log(newSelect, 'newSelect...')
+    // console.log(newSelect, 'newSelect...')
     let obj = {}
     // 处理area
     if (newSelect.area.length === 2) {
@@ -221,15 +223,32 @@ export default class Filter extends Component {
       />
     )
   }
-  render() {
+  renderMask() {
+    //  show   即是display: none
     const isShow = this.state.isShowPicker ? '' : styles.show
+
+    return (
+      <Spring from={{ opacity: 0 }} to={{ opacity: isShow ? 0 : 1 }}>
+        {props => {
+          // console.log(props)
+          if (props.opacity === 0) {
+            return null
+          }
+          return (
+            <div
+              onClick={e => this.clickMask(e)}
+              className={[styles.mask].join(' ')}
+            />
+          )
+        }}
+      </Spring>
+    )
+  }
+  render() {
     return (
       <div className={styles.root}>
         {/* 前三个菜单的遮罩层 */}
-        <div
-          onClick={e => this.clickMask(e)}
-          className={[styles.mask, isShow].join(' ')}
-        />
+        {this.renderMask()}
         <div className={styles.content}>
           {/* 标题栏 */}
           <FilterTitle

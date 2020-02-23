@@ -3,9 +3,17 @@ import styles from './index.module.scss'
 import PropTypes from 'prop-types'
 class HouseItem extends Component {
   render() {
-    const { desc, houseCode, houseImg, price, tags, title } = this.props
+    const {
+      desc,
+      houseCode,
+      houseImg,
+      price,
+      tags,
+      title,
+      onClick
+    } = this.props
     return (
-      <div className={styles.house} key={houseCode}>
+      <div onClick={onClick} className={styles.house} key={houseCode}>
         <div className={styles.imgWrap}>
           <img
             className={styles.img}

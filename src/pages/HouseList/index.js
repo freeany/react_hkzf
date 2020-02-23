@@ -22,7 +22,7 @@ class HouseList extends Component {
     count: '' // 请求回来的数据个数
   }
   onFilter = value => {
-    console.log('houselist接收到的数据为: ', value)
+    // console.log('houselist接收到的数据为: ', value)
     this.initList(value)
   }
 
@@ -46,7 +46,7 @@ class HouseList extends Component {
     })
     Toast.hide()
     window.scrollTo(0, 0)
-    console.log(result, '得到的结果')
+    // console.log(result, '得到的结果')
     const { list, count } = result.data.body
     this.setState({
       list,
@@ -58,10 +58,14 @@ class HouseList extends Component {
     index, // Index of row within collection
     style // Style object to be applied to row (to position it)
   }) => {
+    let item = this.state.list[index]
     return (
       <div key={key} style={style}>
         {this.state.list[index] ? (
-          <HouseItem {...this.state.list[index]}></HouseItem>
+          <HouseItem
+            onClick={() => this.props.history.push(`/detail/${item.houseCode}`)}
+            {...this.state.list[index]}
+          ></HouseItem>
         ) : (
           <div>暂无数据</div>
         )}
@@ -76,7 +80,6 @@ class HouseList extends Component {
 
   // 加载更多
   loadMoreRows = ({ startIndex, stopIndex }) => {
-    console.log(startIndex, stopIndex)
     return new Promise(async resolve => {
       let res = await API.get('/houses', {
         params: {
@@ -86,7 +89,6 @@ class HouseList extends Component {
           end: stopIndex
         }
       })
-
       // 保存数据
       this.setState({
         list: [...this.state.list, ...res.data.body.list]

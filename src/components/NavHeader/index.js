@@ -5,12 +5,14 @@ import PropTypes from 'prop-types'
 import styles from './index.module.scss'
 class NavHeader extends Component {
   render() {
+    const { rightContent, className } = this.props
     return (
-      <div className={styles.navHeader}>
+      <div className={[className, styles.navHeader].join(' ')}>
         <NavBar
           mode="light"
           icon={<i className="iconfont icon-back"></i>}
           onLeftClick={() => this.props.history.goBack()}
+          rightContent={rightContent}
         >
           {this.props.children}
         </NavBar>
