@@ -2,7 +2,7 @@ import axios from 'axios'
 import { setCity, getCity } from './citys'
 import { REACT_APP_URL } from './getBaseUrl'
 import { API } from './API.js'
-import { setToken, getToken, removeToken } from './auth'
+import { setToken, getToken, removeToken, isLogin } from './auth'
 
 const getCurrentCity = () => {
   const currentCity = getCity()
@@ -33,5 +33,6 @@ export {
   API,
   setToken,
   getToken,
-  removeToken
+  removeToken,
+  isLogin
 }

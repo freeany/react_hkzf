@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
 
-import { Carousel, Flex } from 'antd-mobile'
+import { Carousel, Flex, Modal } from 'antd-mobile'
 
 import NavHeader from '../../components/NavHeader'
 import HouseItem from '../../components/HouseItem'
 import HousePackage from '../../components/HousePackage'
-import { API } from '../../utils/index'
+import { API, isLogin, getToken } from '../../utils/index'
 
 import { REACT_APP_URL as BASE_URL } from '../../utils'
 
@@ -60,6 +60,7 @@ const labelStyle = {
 export default class HouseDetail extends Component {
   state = {
     isLoaded: true,
+    isFavorite: false,
 
     houseInfo: {
       // 房屋图片
@@ -189,7 +190,8 @@ export default class HouseDetail extends Component {
                 {oriented[0]}
               </div>
               <div>
-                <span className={styles.title}>类型：</span>普通住宅
+                <span className={styles.title}>类型：</span>
+                普通住宅
               </div>
             </Flex.Item>
           </Flex>
@@ -257,13 +259,18 @@ export default class HouseDetail extends Component {
 
         {/* 底部收藏按钮 */}
         <Flex className={styles.fixedBottom}>
-          <Flex.Item>
+          <Flex.Item onClick={this.handleFavorite}>
             <img
-              src={BASE_URL + '/img/unstar.png'}
+              src={
+                BASE_URL +
+                (this.state.isFavorite ? '/img/star.png' : '/img/unstar.png')
+              }
               className={styles.favoriteImg}
               alt="收藏"
             />
-            <span className={styles.favorite}>收藏</span>
+            <span className={styles.favorite}>
+              {this.state.isFavorite ? '已收藏' : '收藏'}
+            </span>
           </Flex.Item>
           <Flex.Item>在线咨询</Flex.Item>
           <Flex.Item>
@@ -278,6 +285,73 @@ export default class HouseDetail extends Component {
   componentDidMount() {
     // 请求该 房源的数据
     this.getDetailHouse()
+
+    // 获取当前房源是否被  当前登录用户收藏
+    this.houseIsFavvorite()
+  }
+
+  // 获取当前房源是否被收藏, 用来做收藏的状态显示
+  houseIsFavvorite = async () => {
+    // 该 接口添加用户tonken。
+    if (!isLogin()) {
+      return
+    }
+    const { id } = this.props.match.params
+    const res = await API.get(`/user/favorites/${id}`)
+    console.log(res, 'res....')
+    this.setState({
+      isFavorite: res.data.body.isFavorite
+    })
+  }
+
+  // 点击收藏 // 进行收藏  /  取消收藏
+  handleFavorite = async () => {
+    const { id } = this.props.match.params
+
+    if (!isLogin()) {
+      Modal.alert('温馨提示', '登录后才可以收藏', [
+        { text: '取消' },
+        {
+          text: '确定',
+          onPress: () => {
+            this.props.history.push('/login')
+          }
+        }
+      ])
+    } else {
+      // 已经收藏, 需要调用删除接口
+      if (this.state.isFavorite) {
+        Modal.alert('温馨提示', '确定要取消收藏吗', [
+          { text: '取消' },
+          {
+            text: '确定',
+            onPress: async () => {
+              let res2 = await API.delete(`/user/favorites/${id}`)
+
+              if (res2.data.status === 200) {
+                this.setState({
+                  isFavorite: false
+                })
+              }
+            }
+          }
+        ])
+      } else {
+        // 未被收藏
+        // 未收藏
+        let res1 = await await API.post(`/user/favorites/${id}`, null, {
+          headers: {
+            authorization: getToken()
+          }
+        })
+
+        if (res1.data.status === 200) {
+          this.setState({
+            isFavorite: true
+          })
+        }
+      }
+    }
   }
 
   // 请求数据
@@ -351,7 +425,6 @@ export default class HouseDetail extends Component {
       houseInfo: { houseImg }
     } = this.state
 
-    console.log(houseImg, 'houseImg...')
     return houseImg.map(item => (
       <a
         key={item}
@@ -365,7 +438,11 @@ export default class HouseDetail extends Component {
         <img
           src={BASE_URL + item}
           alt=""
-          style={{ width: '100%', height: 250, verticalAlign: 'top' }}
+          style={{
+            width: '100%',
+            height: 250,
+            verticalAlign: 'top'
+          }}
         />
       </a>
     ))

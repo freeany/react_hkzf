@@ -3,7 +3,7 @@ import { Flex, Toast, WingBlank, WhiteSpace } from 'antd-mobile'
 import { API, setToken } from '../../utils'
 
 import { Link } from 'react-router-dom'
-import { withFormik, Form, Field, ErrorMessage } from 'formik'
+import { withFormik } from 'formik'
 import * as Yup from 'yup'
 
 import NavHeader from '../../components/NavHeader'
@@ -28,7 +28,15 @@ class Login extends Component {
   //   e.preventDefault()
   // }
   render() {
-    console.log(this.props, 'login的props。。。')
+    const {
+      values: { username, password },
+      handleChange,
+      handleSubmit,
+      errors,
+      handleBlur,
+      touched
+    } = this.props
+    console.log(errors, 'errors......')
     return (
       <div className={styles.root}>
         {/* 顶部导航 */}
@@ -37,50 +45,42 @@ class Login extends Component {
 
         {/* 登录表单 */}
         <WingBlank>
-          <Form>
+          <form onSubmit={handleSubmit}>
             <div className={styles.formItem}>
-              <Field
+              <input
                 className={styles.input}
                 name="username"
+                value={username}
+                onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="请输入账号"
               />
             </div>
             {/* 长度为5到8位，只能出现数字、字母、下划线 */}
-            {/* {errors.username && touched.username && (
+            {errors.username && touched.username && (
               <div className={styles.error}>{errors.username}</div>
-            )} */}
-            {
-              <ErrorMessage
-                name="username"
-                component="div"
-                className={styles.error}
-              ></ErrorMessage>
-            }
+            )}
             <div className={styles.formItem}>
-              <Field
+              <input
                 className={styles.input}
                 name="password"
                 type="password"
+                value={password}
+                onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="请输入密码"
               />
             </div>
             {/* 长度为5到12位，只能出现数字、字母、下划线 */}
-            {/* {errors.password && touched.password && (
+            {errors.password && touched.password && (
               <div className={styles.error}>{errors.password}</div>
-            )} */}
-            {
-              <ErrorMessage
-                name="password"
-                component="div"
-                className={styles.error}
-              ></ErrorMessage>
-            }
+            )}
             <div className={styles.formSubmit}>
               <button className={styles.submit} type="submit">
                 登 录
               </button>
             </div>
-          </Form>
+          </form>
           <Flex className={styles.backHome}>
             <Flex.Item>
               <Link to="/registe">还没有账号，去注册~</Link>
@@ -94,7 +94,7 @@ class Login extends Component {
 
 Login = withFormik({
   // mapPropsToValues 提供表单元素的状态值， 相当于在state里面添加属性
-  mapPropsToValues: () => ({ username: 'test2', password: 'test2' }),
+  mapPropsToValues: () => ({ username: '', password: '' }),
 
   // 无需安装任何依赖装 validate校验规则
   // validate: values => {
@@ -135,12 +135,7 @@ Login = withFormik({
       //1. 提示
       Toast.success('登录成功', 2, () => {
         //3. 返回
-        // props.history.goBack()
-        if (!props.location.state) {
-          props.history.goBack()
-        } else {
-          props.history.replace(props.location.state)
-        }
+        props.history.goBack()
       })
       //2. 把 token 保存起来
       setToken(res.data.body.token)
