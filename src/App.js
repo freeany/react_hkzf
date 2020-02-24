@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import CityList from './pages/CityList'
 import Map from './pages/Map'
 import Detail from './pages/HouseDetail'
+import Login from './pages/Login'
 
 // import { Button } from 'antd-mobile'
 
@@ -21,6 +22,7 @@ class App extends Component {
           <Route path="/citylist" component={CityList}></Route>
           <Route path="/map" component={Map}></Route>
           <Route path="/detail/:id" component={Detail}></Route>
+          <Route path="/login" component={Login}></Route>
         </Router>
         {/* <div>
           <Button type="primary">按钮</Button>
